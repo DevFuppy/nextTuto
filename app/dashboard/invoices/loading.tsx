@@ -1,0 +1,1 @@
+export default function Loading(){return <><h1>testLoadingAlloageForThisComponent</h1></>}
