@@ -18,7 +18,8 @@ export default function Search({ placeholder }: { placeholder: string }) {
     
     if (term) {
 
-      params.set("query", term);      
+      params.set("query", term);
+      params.set("page",  "1" )      
 
     } else {
 
