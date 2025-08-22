@@ -3,7 +3,7 @@
 import {z} from 'zod'
 import {neon} from '@neondatabase/serverless';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation';
 
 const sql = neon(process.env.POSTGRES_URL!);
 
@@ -18,6 +18,7 @@ const FormSchema = z.object({
 })
 
 const CreateInvoice = FormSchema.omit({id:true,date:true})
+const UpdateInvoice = FormSchema.omit({id:true,date:true})
 
 export async function createInvoice(formdata: FormData) {
 
@@ -50,4 +51,27 @@ export async function createInvoice(formdata: FormData) {
   redirect('/dashboard/invoices')
 
 
+}
+
+
+
+export async function updateInvoice(id:string, formdata: FormData) {
+
+
+ const {customerId,amount,status} = UpdateInvoice.parse(Object.fromEntries(formdata))
+
+  const amountInCents = amount*100
+  const date = new Date().toISOString().split('T')[0];  
+     
+    await sql`
+    update invoices set 
+     amount = ${amountInCents}, 
+     status = ${status}, 
+     date = ${date}    
+     where id = ${id}
+  `;
+
+
+  revalidatePath('/dashboard/invoices');
+  redirect('/dashboard/invoices');
 }
