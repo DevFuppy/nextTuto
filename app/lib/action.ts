@@ -108,10 +108,31 @@ export async function createInvoice(formState: State, formdata: FormData) {
   redirect("/dashboard/invoices");
 }
 
-export async function updateInvoice(id: string, formdata: FormData) {
-  const { customerId, amount, status } = UpdateInvoice.parse(
-    Object.fromEntries(formdata)
-  );
+export async function updateInvoice(id: string,formState:State, formdata: FormData) {
+  
+  const validation = CreateInvoice.safeParse(Object.fromEntries(formdata));
+
+
+    if (!validation.success) {
+    // console.log(validation.error?.flatten().fieldErrors);
+
+    const newFormState = { ...formState };
+
+    newFormState.errors = validation.error?.flatten().fieldErrors;
+    newFormState.message = "invoice updating failed";
+
+    // console.log(formState)
+
+    return newFormState;
+  }
+
+  const { customerId, amount, status } = validation.data;
+  
+  
+  
+  // const { customerId, amount, status } = UpdateInvoice.parse(
+  //   Object.fromEntries(formdata)
+  // );
 
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split("T")[0];
@@ -125,7 +146,9 @@ export async function updateInvoice(id: string, formdata: FormData) {
      where id = ${id}
   `;
   } catch (error) {
-    console.log(error);
+     return {
+      message: "Database Error: Failed to Update Invoice.",
+    };
   }
 
   revalidatePath("/dashboard/invoices");
